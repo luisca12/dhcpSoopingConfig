@@ -12,9 +12,6 @@ snoopTrust = "ip dhcp snooping trust"
 
 intPatt = r'[a-zA-Z]+\d+\/(?:\d+\/)*\d+'
 
-vlan1101IntList = []
-vlan1103IntList = []
-
 def dhcpSnooopTr(validIPs, username, netDevice):
     # This function is to take a show run
 
@@ -47,10 +44,18 @@ def dhcpSnooopTr(validIPs, username, netDevice):
                     print(f"INFO: Taking a \"{shVlanID1101}\" for device: {validDeviceIP}")
                     shVlanID1101Out = sshAccess.send_command(shVlanID1101)
                     authLog.info(f"Automation successfully ran the command:{shVlanID1101}\n{shHostnameOut}{shVlanID1101}\n{shVlanID1101Out}")
+
+                    if "not found" in shVlanID1101Out:
+                        print(f"INFO: Device {validDeviceIP} does not have VLANS 1101 and 1103, skipping device...")
+                        authLog.info(f"Device {validDeviceIP} does not have VLANS 1101 and 1103, skipping device...")
+                        continue
+
                     shVlanID1101Out1 = re.findall(intPatt, shVlanID1101Out)
                     authLog.info(f"The following interfaces were found under the command: {shVlanID1101}: {shVlanID1101Out1}")
 
                     if shVlanID1101Out1:
+                        vlan1101IntList = []
+                        
                         for interface in shVlanID1101Out1:
                             interface = interface.strip()
                             print(f"INFO: Checking configuration for interface {interface} on device {validDeviceIP}")
@@ -75,6 +80,8 @@ def dhcpSnooopTr(validIPs, username, netDevice):
                     authLog.info(f"The following interfaces were found under the command: {shVlanID1103}: {shVlanID1103Out1}")
 
                     if shVlanID1103Out1:
+                        vlan1103IntList = []
+
                         for interface in shVlanID1103Out1:
                             interface = interface.strip()
                             print(f"INFO: Checking configuration for interface {interface} on device {validDeviceIP}")
@@ -94,7 +101,8 @@ def dhcpSnooopTr(validIPs, username, netDevice):
 
                     with open(f"Outputs/{validDeviceIP}_dhcpSnoopCheck.txt", "a") as file:
                         file.write(f"User {username} connected to device IP {validDeviceIP}\n\n")
-                        file.write(f"{vlan1101IntList}\n{vlan1103IntList}")
+                        file.write(f"Interfaces under vlan 1101:\n{vlan1101IntList}\n")
+                        file.write(f"Interfaces under vlan 1103:\n{vlan1103IntList}")
 
                 except Exception as error:
                     print(f"ERROR: An error occurred: {error}\n", traceback.format_exc())
@@ -110,4 +118,4 @@ def dhcpSnooopTr(validIPs, username, netDevice):
         
         finally:
             print(f"Outputs and files successfully created for device {validDeviceIP}.\n")
-            print("For any erros or logs please check Logs -> authLog.txt\n")
+            print("For any erros or logs please check Logs -> authLog.txt\n"):
