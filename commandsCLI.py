@@ -11,7 +11,7 @@ snoopIntConfigOut = ""
 snoopIntConfigOut1 = ""
 
 shHostname = "show run | i hostname"
-shIntStatus = "show interface status | exc SDW|sdw"
+shIntStatus = "show interface status | exc SDW|sdw|LUM"
 shVlanID1101 = "show vlan id 1101" # Add DHCP Snooping Trust Config
 shVlanID1103 = "show vlan id 1103" # Add DHCP Snooping Trust Config
 # shVlanID1105 = "show vlan id 1105"
