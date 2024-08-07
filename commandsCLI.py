@@ -39,6 +39,20 @@ snoopGenIntConfig = [
     'ip dhcp snooping limit rate 50'
 ]
 
+catchAll = [
+    'event manager applet catchall',
+    'event cli pattern ".*" sync no skip no',
+    'action 1 syslog msg "$_cli_msg"',
+    'exit',
+    'terminal monitor'
+]
+
+delCatchAll = [
+    'no event manager applet catchall',
+    'exit',
+    'terminal no monitor'
+]
+
 # Regex Patterns
 intPatt = r'[a-zA-Z]+\d+\/(?:\d+\/)*\d+'
 intPatt2 = r'[Te]+\d+\/(?:1+\/)+\d+'
@@ -65,7 +79,10 @@ def dhcpSnooopTr(validIPs, username, netDevice):
             print(f"Connecting to device {validDeviceIP}...")
             with ConnectHandler(**currentNetDevice) as sshAccess:
                 try:
-                    sshAccess.enable()
+                    
+                    catchAllOut = sshAccess.send_config_set(catchAll)
+                    authLog.info(f"The script catchall was sent to the device {validDeviceIP}")
+                    print(f"INFO: Script catchall was configured on the device {validDeviceIP}")
                     shHostnameOut = sshAccess.send_command(shHostname)
                     authLog.info(f"User {username} successfully found the hostname {shHostnameOut}")
                     shHostnameOut = shHostnameOut.replace('hostname', '')
@@ -172,6 +189,10 @@ def dhcpSnooopTr(validIPs, username, netDevice):
 
                     snoopGenIntConfigOutStr = " ".join(snoopGenIntConfigOutList)
                     snoopGenIntConfigOutStr.split("\n")
+
+                    delCatchAllOut = sshAccess.send_config_set(delCatchAll)
+                    authLog.info(f"The script catchall was unconfigured from the device {validDeviceIP}")
+                    print(f"INFO: Script catchall was unconfigured from the device {validDeviceIP}")
 
                     writeMemOut = sshAccess.send_command('write')
                     print(f"INFO: Running configuration saved for device {validDeviceIP}")
