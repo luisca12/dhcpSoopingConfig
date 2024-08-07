@@ -12,12 +12,8 @@ snoopIntConfigOut1 = ""
 
 shHostname = "show run | i hostname"
 shIntStatus = "show interface status | exc SDW|sdw|LUM"
-shVlanID1101 = "show vlan id 1101" # Add DHCP Snooping Trust Config
-shVlanID1103 = "show vlan id 1103" # Add DHCP Snooping Trust Config
-# shVlanID1105 = "show vlan id 1105"
-# shVlanID1107 = "show vlan id 1107"
-# shVlanID1193 = "show vlan id 1193"
-# shVlanID1194 = "show vlan id 1194"
+shVlanID1101 = "show vlan id 1101"
+shVlanID1103 = "show vlan id 1103"
 
 snoopGenIntConfigOutList = []
 
@@ -106,10 +102,12 @@ def dhcpSnooopTr(validIPs, username, netDevice):
                             else:
                                 print(f"INFO: Interface {interface} does NOT have configured {snoopTrust} on device {validDeviceIP}")
                                 authLog.info(f"Interface {interface} does NOT have configured {snoopTrust} on device {validDeviceIP}")
-                                vlan1101IntList.append(f"Interface {interface} does NOT have configured {snoopTrust}")
+                                vlan1101IntList.append(f"Interface {interface} does NOT have configured {snoopTrust} on device {validDeviceIP}")
+                                print(f"INFO: Configuring interface {interface} on device {validDeviceIP}")
                                 snoopIntConfig[0] = f'int {interface}'
                                 snoopIntConfigOut = sshAccess.send_config_set(snoopIntConfig)
                                 authLog.info(f"Automation sent the following configuration to interface {interface} on device {validDeviceIP}\n{snoopIntConfigOut}")
+                                print(f"INFO: Successfully configured interface {interface} on device {validDeviceIP} with the below configuration:\n{snoopIntConfigOut1}")
                                 configured = False
                     else:
                         print(f"INFO: No interfaces found under {shVlanID1101}")
@@ -139,9 +137,11 @@ def dhcpSnooopTr(validIPs, username, netDevice):
                             else:
                                 print(f"INFO: Interface {interface} does NOT have configured {snoopTrust} on device {validDeviceIP}")
                                 authLog.info(f"Interface {interface} does NOT have configured {snoopTrust} on device {validDeviceIP}")
-                                vlan1103IntList.append(f"Interface {interface} does NOT have configured {snoopTrust}")
+                                vlan1103IntList.append(f"Interface {interface} does NOT have configured {snoopTrust} on device {validDeviceIP}")
+                                print(f"INFO: Configuring interface {interface} on device {validDeviceIP}")
                                 snoopIntConfig[0] = f'int {interface}'
                                 snoopIntConfigOut1 = sshAccess.send_config_set(snoopIntConfig)
+                                print(f"INFO: Successfully configured interface {interface} on device {validDeviceIP} with the below configuration:\n{snoopIntConfigOut1}")
                                 authLog.info(f"Automation sent the following configuration to interface {interface} on device {validDeviceIP}\n{snoopIntConfigOut1}")
                                 configured1 = False
                     else:
@@ -151,18 +151,23 @@ def dhcpSnooopTr(validIPs, username, netDevice):
                     if configured or configured1 == False:
                         snoopGlobalConfigOut = sshAccess.send_config_set(snoopGlobalConfig)
                         authLog.info(f"Automation sent the following General Configuration to device {validDeviceIP}\n{snoopGlobalConfigOut}")
+                        print(f"INFO: The following General Configuration was sent to the device {validDeviceIP}\n{snoopGlobalConfigOut}")
 
                     shIntStatusOut = sshAccess.send_command(shIntStatus)
                     authLog.info(f"Automation ran the command \"{shIntStatus}\" on device {validDeviceIP}\n{shHostnameOut}{shIntStatusOut}")
+                    print(f"INFO: Running the following command: \"{shIntStatus}\" on device {validDeviceIP}\n{shHostnameOut}{shIntStatusOut}")
                     shIntStatusOut1 = re.findall(intPatt, shIntStatusOut)
                     authLog.info(f"Automation found the following interfaces on device {validDeviceIP}: {shIntStatusOut1}")
                     shIntStatusOut2 = [match for match in shIntStatusOut1 if not re.match(intPatt2, match)]
                     authLog.info(f"Automation filtered the following interfaces on device {validDeviceIP}: {shIntStatusOut2}")
+                    print(f"INFO: The following interfaces will be modified: {shIntStatusOut2}")
 
                     for interface in shIntStatusOut2:
+                        print(f"INFO: Configuring interface {interface} on device {validDeviceIP}")
                         snoopGenIntConfig[0] = f'int {interface}'
                         snoopGenIntConfigOut = sshAccess.send_config_set(snoopGenIntConfig)
                         authLog.info(f"Automation sent the following configuration to interface {interface} on device {validDeviceIP}\n{snoopGenIntConfigOut}")
+                        print(f"INFO: Successfully configured Interface {interface} on device {validDeviceIP}\n")
                         snoopGenIntConfigOutList.append(snoopGenIntConfigOut)
 
                     snoopGenIntConfigOutStr = " ".join(snoopGenIntConfigOutList)
@@ -170,6 +175,7 @@ def dhcpSnooopTr(validIPs, username, netDevice):
 
                     writeMemOut = sshAccess.send_command('write')
                     print(f"INFO: Running configuration saved for device {validDeviceIP}")
+                    print(f"INFO: All the configuration has been applied")
                     authLog.info(f"Running configuration saved for device {validDeviceIP}\n{shHostnameOut}'write'\n{writeMemOut}")
 
                     with open(f"Outputs/{validDeviceIP}_dhcpSnoopCheck.txt", "a") as file:
@@ -199,3 +205,4 @@ def dhcpSnooopTr(validIPs, username, netDevice):
         finally:
             print(f"Outputs and files successfully created for device {validDeviceIP}.\n")
             print("For any erros or logs please check Logs -> authLog.txt\n")
+            print(f"Program finished, all the configuration has been applied.")
