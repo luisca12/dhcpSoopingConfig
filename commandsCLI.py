@@ -79,7 +79,7 @@ def dhcpSnooopTr(validIPs, username, netDevice):
             print(f"Connecting to device {validDeviceIP}...")
             with ConnectHandler(**currentNetDevice) as sshAccess:
                 try:
-                    
+                    sshAccess.enable()
                     catchAllOut = sshAccess.send_config_set(catchAll)
                     authLog.info(f"The script catchall was sent to the device {validDeviceIP}")
                     print(f"INFO: Script catchall was configured on the device {validDeviceIP}")
