@@ -116,3 +116,6 @@ def requestLogin(validIPs):
             print(" Retrying operation... \n")
             authLog.error(f"Remote device unreachable - remote device IP: {deviceIP}, Username: {username}")
             authLog.debug(traceback.format_exc())
+
+def checkYNInput(stringInput):
+    return stringInput.lower() == 'y' or stringInput.lower() == 'n'
