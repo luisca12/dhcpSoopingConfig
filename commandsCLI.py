@@ -43,13 +43,13 @@ catchAll = [
     'event manager applet catchall',
     'event cli pattern ".*" sync no skip no',
     'action 1 syslog msg "$_cli_msg"',
-    'exit',
+    'end',
     'terminal monitor'
 ]
 
 delCatchAll = [
     'no event manager applet catchall',
-    'exit',
+    'end',
     'terminal no monitor'
 ]
 
@@ -124,7 +124,7 @@ def dhcpSnooopTr(validIPs, username, netDevice):
                                 snoopIntConfig[0] = f'int {interface}'
                                 snoopIntConfigOut = sshAccess.send_config_set(snoopIntConfig)
                                 authLog.info(f"Automation sent the following configuration to interface {interface} on device {validDeviceIP}\n{snoopIntConfigOut}")
-                                print(f"INFO: Successfully configured interface {interface} on device {validDeviceIP} with the below configuration:\n{snoopIntConfigOut1}")
+                                print(f"INFO: Successfully configured interface {interface} on device {validDeviceIP} with the below configuration:\n{snoopIntConfigOut}")
                                 configured = False
                     else:
                         print(f"INFO: No interfaces found under {shVlanID1101}")
