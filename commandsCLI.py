@@ -42,15 +42,11 @@ snoopGenIntConfig = [
 catchAll = [
     'event manager applet catchall',
     'event cli pattern ".*" sync no skip no',
-    'action 1 syslog msg "$_cli_msg"',
-    'end',
-    'terminal monitor'
+    'action 1 syslog msg "$_cli_msg"'
 ]
 
 delCatchAll = [
-    'no event manager applet catchall',
-    'end',
-    'terminal no monitor'
+    'no event manager applet catchall'
 ]
 
 # Regex Patterns
