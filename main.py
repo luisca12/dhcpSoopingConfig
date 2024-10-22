@@ -9,7 +9,7 @@ def main():
     greetingString()
     from auth import Auth
     from functions import checkIsDigit
-    from commandsCLI import dhcpSnooopTr
+    from commandsCLI import dot1xThread
     from log import authLog
     
     validIPs, username, netDevice = Auth()
@@ -20,7 +20,7 @@ def main():
         if checkIsDigit(selection):
             if selection == "1":
                 # This option will take a show run
-                dhcpSnooopTr(validIPs, username, netDevice)
+                dot1xThread(validIPs, username, netDevice)
             if selection == "2":
                 authLog.info(f"User {username} disconnected from the devices {validIPs}")
                 authLog.info(f"User {username} logged out from the program.")

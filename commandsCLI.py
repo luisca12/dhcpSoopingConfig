@@ -2,6 +2,7 @@ from netmiko import ConnectHandler
 from log import authLog
 
 import traceback
+import threading
 import re
 import os
 
@@ -56,7 +57,10 @@ intPatt2 = r'[Te]+\d+\/(?:1+\/)+\d+'
 def dhcpSnooopTr(validIPs, username, netDevice):
     # This function is to take a show run
 
+    validIPs = [validIPs]
     for validDeviceIP in validIPs:
+        configured = False
+        configured1 = False
         try:
             validDeviceIP = validDeviceIP.strip()
             currentNetDevice = {
@@ -195,7 +199,7 @@ def dhcpSnooopTr(validIPs, username, netDevice):
                     print(f"INFO: All the configuration has been applied")
                     authLog.info(f"Running configuration saved for device {validDeviceIP}\n{shHostnameOut}'write'\n{writeMemOut}")
 
-                    with open(f"Outputs/{validDeviceIP}_dhcpSnoopCheck.txt", "a") as file:
+                    with open(f"Outputs/{validDeviceIP} DHCP Snooping Config.txt", "a") as file:
                         file.write(f"User {username} connected to device IP {validDeviceIP}\n\n")
                         file.write(f"Interfaces under vlan 1101:\n{vlan1101IntList}\n")
                         file.write(f"Interfaces under vlan 1103:\n{vlan1103IntList}\n")
@@ -206,20 +210,31 @@ def dhcpSnooopTr(validIPs, username, netDevice):
                         file.write(f"\nConfiguration applied to every port:{snoopGenIntConfigOutStr}")
                         authLog.info(f"File {validDeviceIP}_dhcpSnoopCheck.txt was created successfully.")
 
+                    print(f"Outputs and files successfully created for device {validDeviceIP}.\n")
+                    print("For any erros or logs please check Logs -> authLog.txt\n")
+                    print(f"Program finished, all the configuration has been applied.")
+
                 except Exception as error:
                     print(f"ERROR: An error occurred: {error}\n", traceback.format_exc())
-                    authLog.error(f"User {username} connected to {validDeviceIP} got an error: {error}")
+                    authLog.error(f"User {username} connected to {validDeviceIP} got an error: {error}", traceback.format_exc())
                     authLog.error(traceback.format_exc(),"\n")
-                    os.system("PAUSE")
        
         except Exception as error:
             print(f"ERROR: An error occurred: {error}\n", traceback.format_exc())
             authLog.error(f"User {username} connected to {validDeviceIP} got an error: {error}")
-            authLog.error(traceback.format_exc(),"\n")
+            authLog.error(traceback.format_exc(),"\n", traceback.format_exc())
             with open(f"failedDevices.txt","a") as failedDevices:
                 failedDevices.write(f"User {username} connected to {validDeviceIP} got an error.\n")
-        
-        finally:
-            print(f"Outputs and files successfully created for device {validDeviceIP}.\n")
-            print("For any erros or logs please check Logs -> authLog.txt\n")
-            print(f"Program finished, all the configuration has been applied.")
+
+def dot1xThread(validIPs, username, netDevice):
+    threads = []
+
+    for validDeviceIP in validIPs:
+        thread = threading.Thread(target=dhcpSnooopTr, args=(validDeviceIP, username, netDevice))
+        thread.start()
+        authLog.info(f"Thread {thread} started.")
+        threads.append(thread)
+        authLog.info(f"Thread {thread} appended to threads: {threads}")
+
+    for thread in threads:
+        thread.join()
